@@ -1,27 +1,31 @@
-#!ruby
+#!/usr/local/bin/ruby
 require 'optparse'
 
-def call(cmd)
-    output=`#{cmd}`
-    result=$?.success?
-    return output.strip, result
+def getconfig(conf)
+    output=`git config --get #{conf}`
+    output if $?.success?
 end
 
 options = {}
-options[:hostname], _ = call("git config --get host.hostname")
-options[:username], _ = call("git config --get host.username")
-options[:password], _ = call("git config --get host.password")
+options[:hostname] = getconfig("host.hostname")
+options[:username] = getconfig("host.username")
+options[:password] = getconfig("host.password")
 options[:reponame] = nil
 options[:description] = nil
 
 hosts = {
     "bitbucket" => {
         "create-repo" => lambda do
+            abort "host.username or --username must be specified" unless options[:username]
+            abort "host.password --password must be specified" unless options[:password]
+
             system("curl --silent --request POST --user #{options[:username]}:#{options[:password]} https://api.bitbucket.org/1.0/repositories/ --data name=#{options[:reponame]} --data scm=git --data description #{options[:description]}")
             abort "Command failed" unless $?.success?
         end,
 
         "url-for" => lambda do
+            abort "host.username or --username must be specified" unless options[:username]
+
             puts "git@bitbucket.org:#{options[:username]}/#{options[:reponame]}.git"
         end,
     }
@@ -58,6 +62,7 @@ url-repo: Prints the url of the remote repository to stdout
         exit
     end
 end
+option_parser.parse!
 
 if ARGV.length != 2 then
     puts option_parser
@@ -65,15 +70,13 @@ else
     commandname = ARGV[0]
     options[:reponame] = ARGV[1]
 
+    abort "host.hostname or --hostname must be specified" unless options[:hostname]
+
     host = hosts[options[:hostname]]
     abort "Unknown hostname '#{options[:hostname]}'" unless host
 
     command = host[commandname]
     abort "Unknown command '#{commandname}'" unless command
-    
-    abort "host.hostname or --host must be specified" unless options[:host]
-    abort "host.username or --username must be specified" unless options[:username]
-    abort "host.password --password must be specified" unless options[:password]
 
     command.call()
 end
