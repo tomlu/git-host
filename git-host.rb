@@ -66,7 +66,7 @@ url-repo: Prints the url of the remote repository to stdout
         options[:description] = val
     end
 
-    opts.on("--[no]private", "(create-repo only): Create a private repository.") do |val|
+    opts.on("--[no-]private", "(create-repo only): Create a private repository.") do |val|
         options[:private] = val
     end
 
