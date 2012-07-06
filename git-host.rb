@@ -2,7 +2,7 @@
 require 'optparse'
 
 def getconfig(conf)
-    output=`git config --get #{conf}`
+    output=`git config --get #{conf}`.strip
     output if $?.success?
 end
 
@@ -26,7 +26,7 @@ hosts = {
         "url-for" => lambda do
             abort "host.username or --username must be specified" unless options[:username]
 
-            puts "git@bitbucket.org:#{options[:username]}/#{options[:reponame]}.git"
+            puts "git@bitbucket.org:#{options[:username]}/#{options[:reponame].downcase}.git"
         end,
     }
 }
