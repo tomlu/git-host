@@ -8,6 +8,7 @@ end
 
 options = {}
 options[:account] = getconfig("host.account")
+options[:description] = ""
 
 hosts = {
     "bitbucket" => {
@@ -15,7 +16,7 @@ hosts = {
             abort "host.<account>.username or --username must be in your git config" unless options[:username]
             abort "host.<account>.password --password must be in your git config" unless options[:password]
 
-            system("curl --silent --request POST --user #{options[:username]}:#{options[:password]} https://api.bitbucket.org/1.0/repositories/ --data name=#{options[:reponame]} --data scm=git --data description #{options[:description]} --data is_private=#{options[:private]}")
+            system("curl --silent --request POST --user #{options[:username]}:#{options[:password]} https://api.bitbucket.org/1.0/repositories/ --data name=#{options[:reponame]} --data scm=git --data description=\"#{options[:description]}\" --data is_private=#{options[:private]}")
             abort "Command failed" unless $?.success?
         end,
 
