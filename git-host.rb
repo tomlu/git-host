@@ -7,12 +7,7 @@ def getconfig(conf)
 end
 
 options = {}
-options[:hostname] = getconfig("host.hostname")
-options[:username] = getconfig("host.username")
-options[:password] = getconfig("host.password")
-options[:private] = getconfig("host.private") || false
-options[:reponame] = nil
-options[:description] = nil
+options[:account] = getconfig("host.account")
 
 hosts = {
     "bitbucket" => {
@@ -50,16 +45,8 @@ create-repo: Creates a remote repository
 url-repo: Prints the url of the remote repository to stdout
 "
 
-    opts.on("--hostname [HOST]", "The repository host (eg. bitbucket). If omitted, read from git config host.hostname.") do |val|
-        options[:hostname] = val
-    end
-    
-    opts.on("--username [USERNAME]", "The repository username. If omitted, read from git config host.username.") do |val|
-        options[:username] = val
-    end
-
-    opts.on("--password [PASSWORD]", "The repository password. If omitted, read from git config host.password.") do |val|
-        options[:password] = val
+    opts.on("--account [ACCOUNT]", "The host account. If omitted, the default account is read.") do |val|
+        options[:account] = val
     end
 
     opts.on("--description [DESCRIPTION]", "(create-repo only): Adds a description to the repository.") do |val|
@@ -82,6 +69,13 @@ if ARGV.length != 2 then
 else
     commandname = ARGV[0]
     options[:reponame] = ARGV[1]
+
+    abort "host.account or --account must be specified" unless options[:account]
+
+    options[:hostname] = getconfig("host.#{options[:account]}.hostname")
+    options[:username] = getconfig("host.#{options[:account]}.username")
+    options[:password] = getconfig("host.#{options[:account]}.password")
+    options[:private] = getconfig("host.#{options[:account]}.private") || false if options[:private] == nil
 
     abort "host.hostname or --hostname must be specified" unless options[:hostname]
 
