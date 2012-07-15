@@ -12,23 +12,23 @@ options[:account] = getconfig("host.account")
 hosts = {
     "bitbucket" => {
         "create-repo" => lambda do
-            abort "host.username or --username must be specified" unless options[:username]
-            abort "host.password --password must be specified" unless options[:password]
+            abort "host.<account>.username or --username must be in your git config" unless options[:username]
+            abort "host.<account>.password --password must be in your git config" unless options[:password]
 
             system("curl --silent --request POST --user #{options[:username]}:#{options[:password]} https://api.bitbucket.org/1.0/repositories/ --data name=#{options[:reponame]} --data scm=git --data description #{options[:description]} --data is_private=#{options[:private]}")
             abort "Command failed" unless $?.success?
         end,
 
         "delete-repo" => lambda do
-            abort "host.username or --username must be specified" unless options[:username]
-            abort "host.password --password must be specified" unless options[:password]
+            abort "host.<account>.username or --username must be in your git config" unless options[:username]
+            abort "host.<account>.password --password must be in your git config" unless options[:password]
 
             system("curl --silent --request DELETE --user #{options[:username]}:#{options[:password]} https://api.bitbucket.org/1.0/repositories/#{options[:username]}/#{options[:reponame].downcase}")
             abort "Command failed" unless $?.success?
         end,
 
         "url-for" => lambda do
-            abort "host.username or --username must be specified" unless options[:username]
+            abort "host.<account>.username or --username must be in your git config" unless options[:username]
 
             puts "git@bitbucket.org:#{options[:username]}/#{options[:reponame].downcase}.git"
         end,
@@ -77,7 +77,7 @@ else
     options[:password] = getconfig("host.#{options[:account]}.password")
     options[:private] = getconfig("host.#{options[:account]}.private") || false if options[:private] == nil
 
-    abort "host.hostname or --hostname must be specified" unless options[:hostname]
+    abort "host.<account>.hostname must be in your git config" unless options[:hostname]
 
     host = hosts[options[:hostname]]
     abort "Unknown hostname '#{options[:hostname]}'" unless host
