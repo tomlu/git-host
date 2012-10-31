@@ -9,7 +9,8 @@ git-host provides a command line interface to repository management. This can be
 Supported hosts
 ---------------
 
-At the moment only Bitbucket is supported.
+* Github
+* Bitbucket
 
 Documentation
 -------------
@@ -28,7 +29,7 @@ Example
 	git host add --account bigco --hostname bitbucket --username admin@bigco.com --password 12345
 
 	# Set this account as the default account for this repository
-	git host set-default bigco
+	git host set-default --account bigco
 
-	# Create a new repo
+	# Create a new repo using the default account
 	git host create-repo bigproj --private --description "Our new awesome project"

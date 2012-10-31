@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby
 require 'optparse'
+require 'json'
 
 def getconfig(conf)
     output=`git config --get host.#{conf}`.strip
@@ -12,10 +13,12 @@ def setconfig(conf, val, global)
 end
 
 options = {}
-options[:account] = getconfig("default")
+options[:account] = nil
 options[:description] = ""
 
 read_account = lambda do
+
+    options[:account] = options[:account] || getconfig("default")
 
     abort "No account specified" unless options[:account]
     options[:hostname] = getconfig("#{options[:account]}.hostname")
@@ -73,6 +76,35 @@ hosts = {
             abort "No username specified" unless options[:username]
 
             puts "git@bitbucket.org:#{options[:username]}/#{options[:reponame].downcase}.git"
+        end,
+    },
+
+    "github" => {
+        "create-repo" => lambda do
+            abort "No username specified" unless options[:username]
+            abort "No password specified" unless options[:password]
+
+            json = JSON.generate(
+                    :name => options[:reponame],
+                    :description => options[:description],
+                    :private => options[:private],
+                )
+            system("curl --silent -X POST -u #{options[:username]}:#{options[:password]} --data '#{json}' https://api.github.com/user/repos")
+            abort "Command failed" unless $?.success?
+        end,
+
+        "delete-repo" => lambda do
+            abort "No username specified" unless options[:username]
+            abort "No password specified" unless options[:password]
+
+            system("curl --silent -X DELETE -u #{options[:username]}:#{options[:password]} https://api.github.com/repos/#{options[:username]}/#{options[:reponame]}")
+            abort "Command failed" unless $?.success?
+        end,
+
+        "url-for" => lambda do
+            abort "No username specified" unless options[:username]
+
+            puts "git@github.com:#{options[:username]}/#{options[:reponame]}.git"
         end,
     }
 }
