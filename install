@@ -4,7 +4,7 @@
 require 'pathname'
 
 name = 'git-host'
-git_path = %x(which git)
+git_path = %x(which git).rstrip
 
 if File.symlink? git_path
     git_path = Pathname.new(git_path).realpath.to_s
